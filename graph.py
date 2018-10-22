@@ -11,7 +11,12 @@ from __future__ import (division as _py3_division,
                         absolute_import as _py3_abs_import)
 
 from collections import deque, OrderedDict
-import sys
+import sys, numpy as np
+
+class InvalidPath(float):
+
+    def __add__(self, other):
+        return other
 
 
 class Vertex(object):
@@ -27,6 +32,7 @@ class Vertex(object):
         self.visited = False
         # Predecessor
         self.predecessor = None
+        self.invalid = InvalidPath()
 
 
     def __str__(self):
@@ -79,6 +85,7 @@ class Vertex(object):
         self.predecessor = prev
 
 
+
 class Graph(object):
     '''Class graph
 
@@ -87,6 +94,8 @@ class Graph(object):
         self.list_vertices = OrderedDict()
         self.count_vertices = 0
         self.count_edges = 0
+        self.invalid = InvalidPath()
+
 
     def __contains__(self, vertex):
         return vertex in self.list_vertices.keys()
@@ -154,3 +163,21 @@ class Graph(object):
             else:
                 adjacency.append(vertex.adjacency.items())
         return adjacency
+
+
+    def get_matrix_adjacency(self):
+        '''Get matrix adjacency
+        '''
+        matrix = np.zeros((self.count_vertices, self.count_vertices))
+        nodes = self.list_vertices
+
+        for i in range(self.count_vertices):
+            for j in range(self.count_vertices):
+                adjacency = nodes[str(i)].adjacency
+                key = str(j)
+                if key in adjacency:
+                    matrix[i,j] = adjacency[key]
+                else:
+                    matrix[i,j] = 100
+
+        return matrix

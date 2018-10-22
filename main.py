@@ -12,7 +12,6 @@ from __future__ import (division as _py3_division,
 from collections import deque
 from graph import Graph
 from genetic import Genetic
-from texttable import Texttable
 
 class Main(object):
 
@@ -23,6 +22,7 @@ class Main(object):
         print ('''*******************Genetic algorithm********************
                Author: Oraldo Jacinto Simon
                ''')
+
         list_edges_weight = []
         fichero = open("VLSI.txt", 'r')
         lines = fichero.read()
@@ -35,7 +35,7 @@ class Main(object):
         epochs = 10000
         # Can be cities or nodes
         elite = 80
-
-        obj_genetic = Genetic(pop_size, epochs, graph, elite, rate_mutation=0.5)
+        obj_genetic = Genetic(pop_size, epochs, graph, elite,
+                              rate_mutation=0.5, selection_type='tourney_probabilistic')
         obj_genetic.run()
 Main()

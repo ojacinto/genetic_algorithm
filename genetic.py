@@ -20,7 +20,7 @@ class Genetic(object):
 
     '''
 
-    def __init__(self, pop_size, epochs, graph, elite, rate_mutation):
+    def __init__(self, pop_size, epochs, graph, elite, rate_mutation, selection_type):
         self.pop_size = pop_size
         self.epochs = epochs
         self.graph = graph
@@ -28,7 +28,7 @@ class Genetic(object):
         self.count_nodes = graph.count_vertices
         self.elite = elite
         self.rate_mutation = rate_mutation
-        self.selection_type = None
+        self.selection_type = selection_type
         self.population = []
         list_nodes = [e for e in self.nodes.keys()]
         for nroute in range(pop_size):
@@ -55,8 +55,9 @@ class Genetic(object):
         for index, route in enumerate(population[1:]):
             cost = self.fitness(route)
             result_fistness[index+1] = cost
-            minimun['cost'] = minimun['cost'] if minimun['cost'] < cost else cost
-            minimun['index'] = index
+            if minimun['cost'] > cost:
+                 minimun['cost'] = cost
+                 minimun['index'] = index
         return result_fistness, minimun
 
     def selection(self, pop_size, population, routes_cost):
@@ -76,7 +77,7 @@ class Genetic(object):
         p takes values ​​in the range (0.5 - 1).
 
         '''
-        p =  0.7
+        p =  0.6
         selection_result = []
         method = self.selection_type
         # Select two parents
@@ -92,7 +93,7 @@ class Genetic(object):
             if method == 'tourney_deterministic' or method is None:
                 selection_result.append(winner)
             elif method == 'tourney_probabilistic':
-                aleatory_value = aleatory(0, 1)
+                aleatory_value = aleatory(0, 10) / 10
                 selection_result.append(winner) if aleatory_value >= p else selection_result.append(loser)
         return selection_result
 
@@ -101,9 +102,10 @@ class Genetic(object):
 
         '''
         for g in range(self.count_nodes):
+            mutate = aleatory(0, 10) / 10
             for chi in range(0,2):
-                aleatory_value = aleatory(0, 1)
-                if aleatory_value > self.rate_mutation:
+                aleatory_value = aleatory(0, self.count_nodes-1)
+                if mutate > self.rate_mutation:
                     # Change values in childs
                     temp1 = childs[chi][g]
                     childs[chi][g] = childs[chi][aleatory_value]
@@ -148,7 +150,7 @@ class Genetic(object):
         new_childs = []
         routes_cost, minimun_pop = self.calculate_routes(population)
         pop_size = int(elite/100 * len(population))
-        for e in range(0, int(self.count_nodes / 2)):
+        for e in range(0, self.count_nodes):
             # Take a representative (%) size of the elite of the population
             parents_selection = self.selection(pop_size, population, routes_cost)
             # In each crossing, two children are born
