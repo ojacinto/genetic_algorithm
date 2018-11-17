@@ -30,6 +30,7 @@ class Genetic(object):
         self.rate_mutation = rate_mutation
         self.selection_type = selection_type
         self.population = []
+        self.routes_cost = []
         list_nodes = [e for e in self.nodes.keys()]
         for nroute in range(pop_size):
             self.population.append(random.sample(list_nodes, self.count_nodes))
@@ -49,15 +50,19 @@ class Genetic(object):
         dict()
 
         '''
-        cost_first = self.fitness(population[0])
-        result_fistness = {0: cost_first}
-        minimun = {'index': 0, 'cost': cost_first}
-        for index, route in enumerate(population[1:]):
+        result_fistness, minimun = {}, {}
+        for index, route in enumerate(population[:-1]):
             cost = self.fitness(route)
-            result_fistness[index+1] = cost
-            if minimun['cost'] > cost:
+            next_cost = self.fitness(population[index+1])
+            result_fistness[index] = cost
+            if next_cost > cost :
                  minimun['cost'] = cost
                  minimun['index'] = index
+            else:
+                minimun['cost'] = next_cost
+                minimun['index'] = index+1
+            index += 1
+        result_fistness[index] = next_cost
         return result_fistness, minimun
 
     def selection(self, pop_size, population, routes_cost):
@@ -82,8 +87,8 @@ class Genetic(object):
         method = self.selection_type
         # Select two parents
         for j in range(0, 2):
-            index_a = aleatory(0, pop_size)
-            index_b = aleatory(0, pop_size)
+            index_a = aleatory(0, pop_size-1)
+            index_b = aleatory(0, pop_size-1)
             subject_a = population[index_a]
             subject_b = population[index_b]
             cost_a = routes_cost[index_a]
@@ -142,6 +147,8 @@ class Genetic(object):
             aleatory_value = aleatory(0, self.pop_size-1)
             if cost < routes_cost[aleatory_value]:
                 self.population[aleatory_value] = new_childs[child]
+                self.routes_cost[aleatory_value] = cost
+
 
     def next_generation(self, population, elite):
         '''Compute the next generation
@@ -149,6 +156,7 @@ class Genetic(object):
         '''
         new_childs = []
         routes_cost, minimun_pop = self.calculate_routes(population)
+        self.routes_cost = routes_cost
         pop_size = int(elite/100 * len(population))
         for e in range(0, self.count_nodes):
             # Take a representative (%) size of the elite of the population
@@ -160,9 +168,7 @@ class Genetic(object):
         childs_cost, minimun_child = self.calculate_routes(new_childs)
         childs_cost = sorted(childs_cost.items(), key = operator.itemgetter(1))
         self.reinsertion(new_childs, childs_cost, routes_cost)
-        min_child = minimun_child['cost']
-        min_pop = minimun_pop['cost']
-        mini = minimun_child if min_child < min_pop else minimun_pop
+        routes_cost, mini = self.calculate_routes(population)
         return mini
 
 
@@ -174,3 +180,4 @@ class Genetic(object):
             mini = self.next_generation(self.population, self.elite)
             print ("Epochs %s, cost: %i" % ((n+1), mini['cost']))
         print ("Result: %s" % str(self.population[mini['index']]))
+        return self.population[mini['index']]

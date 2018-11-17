@@ -12,6 +12,10 @@ from __future__ import (division as _py3_division,
 from collections import deque
 from graph import Graph
 from genetic import Genetic
+import numpy as np
+import networkx as nx
+import matplotlib.pyplot as plt
+import pylab
 
 class Main(object):
 
@@ -19,23 +23,45 @@ class Main(object):
         '''A genetic algorithm to Travelling Salesman Problem.
 
         '''
-        print ('''*******************Genetic algorithm********************
-               Author: Oraldo Jacinto Simon
+        print ('''*******************Genetic algorithm*********************
+              * Authors: Oraldo Jacinto Simon
+              *          Marco Emanuel Casavantes Moreno
+              * ***********************************************************
                ''')
 
-        list_edges_weight = []
-        fichero = open("VLSI.txt", 'r')
-        lines = fichero.read()
-        lines = lines.rsplit('\n')
-        list_edges_weight = [edge.split(' ') for edge in lines if edge !='']
-        fichero.close()
         obj_graph = Graph()
-        graph = obj_graph.add_from_edge(list_edges_weight, directed=False)
+        fichero = open("cities/five_d.txt", 'r')
+        matrix_adjacency = np.loadtxt(fichero)
+        for i, row in enumerate(matrix_adjacency):
+            for j, item in enumerate(row):
+                graph = obj_graph.addEdge(i+1, j+1, item, directed=False)
+        fichero.close()
         pop_size = 100
-        epochs = 10000
+        epochs = 80
         # Can be cities or nodes
         elite = 80
         obj_genetic = Genetic(pop_size, epochs, graph, elite,
                               rate_mutation=0.5, selection_type='tourney_probabilistic')
-        obj_genetic.run()
+        path = obj_genetic.run()
+
+        #Draw graph
+        G = nx.DiGraph()
+        for vertex in graph.__iter__():
+            for v, w in vertex.adjacency.items():
+                G.add_edge(vertex.id, v, weight=w)
+
+        val_map = {'A': 1.0, 'D': 0.5714285714285714, 'H': 0.0}
+
+        values = [val_map.get(node, 0.45) for node in G.nodes()]
+        edge_labels=dict([((u,v,),d['weight'])
+                          for u,v,d in G.edges(data=True)])
+        red_edges = [(e, path[index+1]) for index, e in enumerate(path[:-1])]
+        edge_colors = ['black' if not edge in red_edges else 'red' for edge in G.edges()]
+
+        pos=nx.spring_layout(G)
+        nx.draw_networkx_edge_labels(G,pos,edge_labels=edge_labels)
+        nx.draw(G,pos, node_color = values, node_size=1500,edge_color=edge_colors,edge_cmap=plt.cm.Reds)
+        pylab.show()
+        #G.add_edges_from()
+
 Main()
