@@ -48,18 +48,19 @@ class Main(object):
         G = nx.DiGraph()
         for vertex in graph.__iter__():
             for v, w in vertex.adjacency.items():
-                G.add_edge(vertex.id, v, weight=w)
+                G.add_edge(str(vertex.id), str(v), weight=w)
 
         val_map = {'A': 1.0, 'D': 0.5714285714285714, 'H': 0.0}
 
         values = [val_map.get(node, 0.45) for node in G.nodes()]
+        node_labels = {n:str(n) for n in G.nodes()}
         edge_labels=dict([((u,v,),d['weight'])
                           for u,v,d in G.edges(data=True)])
-        red_edges = [(e, path[index+1]) for index, e in enumerate(path[:-1])]
-        edge_colors = ['black' if not edge in red_edges else 'red' for edge in G.edges()]
-
+        red_edges = [(str(e), str(path[index+1])) for index, e in enumerate(path[:-1])]
+        edge_colors = ['gray' if not edge in red_edges else 'red' for edge in G.edges()]
         pos=nx.spring_layout(G)
-        nx.draw_networkx_edge_labels(G,pos,edge_labels=edge_labels)
+        nx.draw_networkx_labels (G, pos, labels=node_labels)
+        nx.draw_networkx_edge_labels(G,pos, edge_labels=edge_labels)
         nx.draw(G,pos, node_color = values, node_size=1500,edge_color=edge_colors,edge_cmap=plt.cm.Reds)
         pylab.show()
         #G.add_edges_from()
