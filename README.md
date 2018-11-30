@@ -13,5 +13,6 @@
  TSP simétrico mostrando los resultados obtenidos durante la experimentación.  
  
  En la raiz del proyecto se encuentra eldocumento de ayuda y la presentación.
- Cualquier duda o sugerencia contactar a: marcocasavantes@gmail.com 
-                                          ory10887@gmail.com 
+ Cualquier duda o sugerencia contactar a: 
+ marcocasavantes@gmail.com 
+ ory10887@gmail.com 
