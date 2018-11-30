@@ -103,10 +103,33 @@ class Genetic(object):
                 selection_result.append(winner) if aleatory_value >= p else selection_result.append(loser)
         return selection_result
 
-    def mutation(self, childs):
+    def _mutate(self, individual):
+        '''
+        '''
+        _cp = individual
+        mutate = aleatory(0, 10) / 10
+        if mutate > self.rate_mutation:
+            mutant = random.choice(individual)
+            individual.remove(mutant)
+            pos = self.get_best_insertion_pos(individual, mutant)
+            if pos is None:
+                return _cp
+            else:
+                individual.insert(pos, mutant)
+                return individual
+        return individual
+
+    def new_mutation(self, childs):
+        child_a = self._mutate(childs[0])
+        child_b = self._mutate(childs[1])
+        return [child_a, child_b]
+
+    def mutation(self, childs, mode='simple'):
         '''Mutate the chromosomes(routes) by performing a random exchange of genes.
 
         '''
+        if mode != 'simple':
+            return self.new_mutation(childs)
         for g in range(self.count_nodes):
             mutate = aleatory(0, 10) / 10
             for chi in range(0,2):
@@ -139,10 +162,7 @@ class Genetic(object):
         return best_pos
 
     def _cross_a_using_b(self, parents_selection):
-
-
         part2_a, part2_b = [], []
-
         _chA = parents_selection[0]
         _chB = parents_selection[0]
         aleatory_value = aleatory(2, len(_chA)-1) # assuming the same length for both
@@ -211,8 +231,8 @@ class Genetic(object):
             # Take a representative (%) size of the elite of the population
             parents_selection = self.selection(pop_size, population, routes_cost)
             # In each crossing, two children are born
-            childs = self.crossover(parents_selection, pop_size, mode='')
-            childs_mutated = self.mutation(childs)
+            childs = self.crossover(parents_selection, pop_size, mode='heuristic')
+            childs_mutated = self.mutation(childs, mode='heuristic')
             [new_childs.append(child) for child in childs_mutated]
         childs_cost, minimun_child = self.calculate_routes(new_childs)
         childs_cost = sorted(childs_cost.items(), key = operator.itemgetter(1))
