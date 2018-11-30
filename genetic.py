@@ -118,7 +118,53 @@ class Genetic(object):
                     childs[chi][aleatory_value] = temp1
         return childs
 
-    def crossover(self, parents_selection, pop_size):
+
+    def get_best_insertion_pos(self, individual, vertex):
+        adjacency = self.graph.get_matrix_adjacency()
+        count = len(individual)
+        value = adjacency[vertex-1][individual[0]-1] + adjacency[vertex-1][individual[count-1]-1]
+        best_pos = 0 if value > 0 else None
+        min_value = value if value > 0 else 2**10
+        for pos in range(count):
+            if pos + 1 == count:
+                # last element
+                pass
+            else:
+                pos_value = adjacency[individual[pos]-1][vertex-1] + \
+                            adjacency[vertex-1][individual[pos+1]-1]
+                if pos_value > 0:
+                    if pos_value < min_value:
+                        best_pos = pos + 1
+                        min_value = pos_value
+        return best_pos
+
+    def _cross_a_using_b(self, parents_selection):
+
+
+        part2_a, part2_b = [], []
+
+        _chA = parents_selection[0]
+        _chB = parents_selection[0]
+        aleatory_value = aleatory(2, len(_chA)-1) # assuming the same length for both
+
+        child_a = _chA[0:aleatory_value]
+        subs = list(set(_chB) - set(child_a))
+        while subs:
+            pos = self.get_best_insertion_pos(child_a, subs[-1])
+            if pos is None:
+                child_a.append(subs[-1])
+            else:
+                child_a.insert(pos, subs[-1])
+            subs.pop()
+        return child_a
+
+    def _new_crossover(self, parents_selection):
+        swap = lambda x: (x[1], x[0])
+        child_a = self._cross_a_using_b(parents_selection)
+        child_b = self._cross_a_using_b(swap(parents_selection))
+        return [child_a, child_b]
+
+    def crossover(self, parents_selection, pop_size, mode='simple'):
         '''Crossing of 1 point
 
         Selected two individuals cut their chromosomes by a randomly selected
@@ -127,6 +173,8 @@ class Genetic(object):
         descendants. In this way, both descendants.
 
         '''
+        if mode != 'simple':
+            return self._new_crossover(parents_selection)
         part2_a, part2_b = [], []
         aleatory_value = aleatory(0, pop_size)
         child_a = parents_selection[0][0:aleatory_value]
@@ -163,7 +211,7 @@ class Genetic(object):
             # Take a representative (%) size of the elite of the population
             parents_selection = self.selection(pop_size, population, routes_cost)
             # In each crossing, two children are born
-            childs = self.crossover(parents_selection, pop_size)
+            childs = self.crossover(parents_selection, pop_size, mode='')
             childs_mutated = self.mutation(childs)
             [new_childs.append(child) for child in childs_mutated]
         childs_cost, minimun_child = self.calculate_routes(new_childs)
