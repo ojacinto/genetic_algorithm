@@ -43,6 +43,7 @@ class Genetic(object):
         cost = 0
         for index in range(len(route)-1):
             cost += self.graph.get_vertex(route[index]).get_weight(route[index+1])
+        cost += self.graph.get_vertex(route[len(route)-1]).get_weight(route[0])
         return cost
 
     def calculate_routes(self, population):
