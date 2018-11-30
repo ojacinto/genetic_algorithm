@@ -173,8 +173,8 @@ class Graph(object):
 
         for i in range(self.count_vertices):
             for j in range(self.count_vertices):
-                adjacency = nodes[str(i)].adjacency
-                key = str(j)
+                adjacency = nodes[i+1].adjacency
+                key = j + 1
                 if key in adjacency:
                     matrix[i,j] = adjacency[key]
                 else:
