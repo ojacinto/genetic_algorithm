@@ -12,6 +12,8 @@
  aproximadas a problemas de optimización combinatoria. En el presente trabajo se aplica AG y el ACH al problema del 
  TSP simétrico mostrando los resultados obtenidos durante la experimentación.  
  
+ Para correr el programa debe ejecutar la siguiente expresión: python main.py 
+ 
  En la raiz del proyecto se encuentra eldocumento de ayuda y la presentación.
  Cualquier duda o sugerencia contactar a: 
  marcocasavantes@gmail.com
